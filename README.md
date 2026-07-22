@@ -62,7 +62,8 @@ No description provided.
     <img src="https://img.shields.io/static/v1?label=Visibility&message=Public&color=238636&style=flat&logo=github&logoColor=white" alt="Visibility: Public" />
     <img src="https://img.shields.io/static/v1?label=Stars&message=0&color=d29922&style=flat&logo=github&logoColor=white" alt="Stars: 0" />
     <img src="https://img.shields.io/static/v1?label=Forks&message=0&color=8250df&style=flat&logo=git&logoColor=white" alt="Forks: 0" />
-    <img src="https://img.shields.io/static/v1?label=Commits&message=0&color=238636&style=flat&logo=git&logoColor=white" alt="Commits: 0" />
+    <img src="https://img.shields.io/static/v1?label=Commits&message=1&color=238636&style=flat&logo=git&logoColor=white" alt="Commits: 1" />
+    <img src="https://img.shields.io/static/v1?label=Contributors&message=1&color=2ea44f&style=flat&logo=github&logoColor=white" alt="Contributors: 1" />
     <img src="https://img.shields.io/static/v1?label=Open+Issues&message=0&color=da3633&style=flat&logo=github&logoColor=white" alt="Open Issues: 0" />
     <img src="https://img.shields.io/static/v1?label=Default+Branch&message=main&color=0969da&style=flat&logo=git&logoColor=white" alt="Default Branch: main" />
     <img src="https://img.shields.io/static/v1?label=Source&message=Personal&color=238636&style=flat&logo=github&logoColor=white" alt="Source: Personal" />
@@ -71,11 +72,15 @@ No description provided.
 </p>
 
 <p>
-
+    <img src="https://img.shields.io/static/v1?label=Tech&message=Node.js&color=339933&style=flat&logo=nodedotjs&logoColor=white" alt="Tech: Node.js" />
+    <img src="https://img.shields.io/static/v1?label=Tech&message=GitHub+Actions&color=2088FF&style=flat&logo=githubactions&logoColor=white" alt="Tech: GitHub Actions" />
+    <img src="https://img.shields.io/static/v1?label=Tech&message=Markdown&color=000000&style=flat&logo=markdown&logoColor=white" alt="Tech: Markdown" />
 </p>
 
 <p>
     <a href="https://github.com/WolfamIT26/github-profile-generator"><img src="https://img.shields.io/static/v1?label=GitHub&message=Repository&color=181717&style=flat&logo=github&logoColor=white" alt="GitHub: Repository" /></a>
+    <a href="https://github-readme-stats.vercel.app/api?username=WolfamIT26&show_icons=true&include_all_commits=true&hide_border=true&theme=github_dark"><img src="https://img.shields.io/static/v1?label=Deploy&message=Link+1&color=0A66C2&style=flat&logo=rocket&logoColor=white" alt="Deploy: Link 1" /></a>
+    <a href="https://github-readme-stats.vercel.app/api?username=WolfamIT26&show_icons=true&include_all_commits=true&hide_border=true&theme=default"><img src="https://img.shields.io/static/v1?label=Deploy&message=Link+2&color=0A66C2&style=flat&logo=rocket&logoColor=white" alt="Deploy: Link 2" /></a>
 </p>
 
 ### ⚙️ [tutl0371/SEP](https://github.com/tutl0371/SEP)
