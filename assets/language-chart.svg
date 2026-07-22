@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="358" viewBox="0 0 900 358" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Repository language usage</title>
+  <desc id="desc">Top repository languages calculated from GitHub language byte totals.</desc>
+  <rect width="900" height="358" rx="18" fill="#0d1117" />
+  <text x="40" y="38" class="title">Language Analysis</text>
+  <rect x="40" y="62" width="820" height="18" fill="#30363d" rx="5" />
+  <rect x="40.0" y="62" width="654.4" height="18" fill="#3572A5" rx="5" />
+<rect x="694.4" y="62" width="67.2" height="18" fill="#e34c26" rx="5" />
+<rect x="761.6" y="62" width="42.6" height="18" fill="#f1e05a" rx="5" />
+<rect x="804.2" y="62" width="23.0" height="18" fill="#b07219" rx="5" />
+<rect x="827.2" y="62" width="17.2" height="18" fill="#563d7c" rx="5" />
+<rect x="844.4" y="62" width="4.1" height="18" fill="#bdcb4d" rx="5" />
+<rect x="848.5" y="62" width="3.3" height="18" fill="#4F5D95" rx="5" />
+<rect x="851.8" y="62" width="3.0" height="18" fill="#A97BFF" rx="5" />
+  
+        <circle cx="52" cy="111" r="6" fill="#3572A5" />
+        <text x="70" y="116" class="label">Python</text>
+        <text x="810" y="116" text-anchor="end" class="value">79.8%</text>
+      
+
+        <circle cx="52" cy="141" r="6" fill="#e34c26" />
+        <text x="70" y="146" class="label">HTML</text>
+        <text x="810" y="146" text-anchor="end" class="value">8.2%</text>
+      
+
+        <circle cx="52" cy="171" r="6" fill="#f1e05a" />
+        <text x="70" y="176" class="label">JavaScript</text>
+        <text x="810" y="176" text-anchor="end" class="value">5.2%</text>
+      
+
+        <circle cx="52" cy="201" r="6" fill="#b07219" />
+        <text x="70" y="206" class="label">Java</text>
+        <text x="810" y="206" text-anchor="end" class="value">2.8%</text>
+      
+
+        <circle cx="52" cy="231" r="6" fill="#563d7c" />
+        <text x="70" y="236" class="label">CSS</text>
+        <text x="810" y="236" text-anchor="end" class="value">2.1%</text>
+      
+
+        <circle cx="52" cy="261" r="6" fill="#bdcb4d" />
+        <text x="70" y="266" class="label">C</text>
+        <text x="810" y="266" text-anchor="end" class="value">0.5%</text>
+      
+
+        <circle cx="52" cy="291" r="6" fill="#4F5D95" />
+        <text x="70" y="296" class="label">PHP</text>
+        <text x="810" y="296" text-anchor="end" class="value">0.4%</text>
+      
+
+        <circle cx="52" cy="321" r="6" fill="#A97BFF" />
+        <text x="70" y="326" class="label">Kotlin</text>
+        <text x="810" y="326" text-anchor="end" class="value">0.3%</text>
+      
+  <style>
+    .title { fill: #f0f6fc; font: 700 22px Arial, sans-serif; }
+    .label { fill: #c9d1d9; font: 600 16px Arial, sans-serif; }
+    .value { fill: #8b949e; font: 600 15px Arial, sans-serif; }
+    .muted { fill: #8b949e; font: 600 16px Arial, sans-serif; }
+  </style>
+</svg>

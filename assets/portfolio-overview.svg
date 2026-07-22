@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="900" height="330" viewBox="0 0 900 330" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">WolfamIT26 portfolio overview</title>
+  <desc id="desc">Automated portfolio overview generated from GitHub repository metadata.</desc>
+  <rect width="900" height="330" rx="22" fill="#0d1117" />
+  <rect x="24" y="24" width="852" height="282" rx="18" fill="#111827" stroke="#30363d" />
+  <text x="44" y="62" class="eyebrow">AUTOMATED ENGINEERING PORTFOLIO</text>
+  <text x="44" y="92" class="title">WolfamIT26</text>
+  <text x="856" y="62" text-anchor="end" class="context">Top language: Python</text>
+  <text x="856" y="92" text-anchor="end" class="context">Latest push: github-profile-generator</text>
+  
+        <rect x="40" y="116" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="56" y="139" class="metric-label">Repositories</text>
+        <text x="56" y="161" class="metric-value">37</text>
+      
+
+        <rect x="245" y="116" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="261" y="139" class="metric-label">Private Access</text>
+        <text x="261" y="161" class="metric-value">11</text>
+      
+
+        <rect x="450" y="116" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="466" y="139" class="metric-label">Stars</text>
+        <text x="466" y="161" class="metric-value">0</text>
+      
+
+        <rect x="655" y="116" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="671" y="139" class="metric-label">Forks</text>
+        <text x="671" y="161" class="metric-value">1</text>
+      
+
+        <rect x="40" y="192" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="56" y="215" class="metric-label">Commits</text>
+        <text x="56" y="237" class="metric-value">1K</text>
+      
+
+        <rect x="245" y="192" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="261" y="215" class="metric-label">Pull Requests</text>
+        <text x="261" y="237" class="metric-value">101</text>
+      
+
+        <rect x="450" y="192" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="466" y="215" class="metric-label">Tech Detected</text>
+        <text x="466" y="237" class="metric-value">24</text>
+      
+
+        <rect x="655" y="192" width="180" height="56" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="671" y="215" class="metric-label">Est. LOC</text>
+        <text x="671" y="237" class="metric-value">1.6M</text>
+      
+  <text x="44" y="280" class="footer">Generated from REST + GraphQL API data, repository manifests, language bytes, permissions, and contribution signals.</text>
+  <style>
+    .eyebrow { fill: #58a6ff; font: 700 12px Arial, sans-serif; letter-spacing: 1px; }
+    .title { fill: #f0f6fc; font: 800 28px Arial, sans-serif; }
+    .context { fill: #8b949e; font: 600 14px Arial, sans-serif; }
+    .metric-label { fill: #8b949e; font: 600 12px Arial, sans-serif; }
+    .metric-value { fill: #f0f6fc; font: 800 20px Arial, sans-serif; }
+    .footer { fill: #8b949e; font: 600 13px Arial, sans-serif; }
+  </style>
+</svg>

@@ -1,0 +1,68 @@
+name: Update GitHub Profile README
+
+on:
+  schedule:
+    - cron: '0 */12 * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+    paths-ignore:
+      - README.md
+      - assets/**
+
+permissions:
+  contents: write
+
+concurrency:
+  group: profile-readme-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  GITHUB_USERNAME: ${{ vars.GITHUB_USERNAME || 'WolfamIT26' }}
+  GH_TOKEN: ${{ secrets.GH_TOKEN || github.token }}
+  LATEST_PROJECT_LIMIT: ${{ vars.LATEST_PROJECT_LIMIT || 8 }}
+  INCLUDE_PRIVATE_REPOS: ${{ vars.INCLUDE_PRIVATE_REPOS || 1 }}
+  GITHUB_CACHE: ${{ vars.GITHUB_CACHE || 1 }}
+  GITHUB_CACHE_TTL_MS: ${{ vars.GITHUB_CACHE_TTL_MS || 21600000 }}
+
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Restore GitHub API cache
+        uses: actions/cache@v4
+        with:
+          path: .cache/github-api
+          key: profile-readme-cache-${{ github.run_id }}
+          restore-keys: |
+            profile-readme-cache-
+
+      - name: Generate README
+        run: npm run update-readme
+
+      - name: Commit README updates
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add README.md assets/*.svg
+          if git diff --cached --quiet; then
+            echo "No README changes to commit."
+          else
+            git commit -m "docs: update profile README"
+            git push
+          fi
