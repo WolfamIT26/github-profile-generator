@@ -7,12 +7,12 @@
   <rect x="40" y="62" width="820" height="18" fill="#30363d" rx="5" />
   <rect x="40.0" y="62" width="654.4" height="18" fill="#3572A5" rx="5" />
 <rect x="694.4" y="62" width="67.2" height="18" fill="#e34c26" rx="5" />
-<rect x="761.6" y="62" width="42.6" height="18" fill="#f1e05a" rx="5" />
-<rect x="804.2" y="62" width="23.0" height="18" fill="#b07219" rx="5" />
-<rect x="827.2" y="62" width="17.2" height="18" fill="#563d7c" rx="5" />
-<rect x="844.4" y="62" width="4.1" height="18" fill="#bdcb4d" rx="5" />
-<rect x="848.5" y="62" width="3.3" height="18" fill="#4F5D95" rx="5" />
-<rect x="851.8" y="62" width="3.0" height="18" fill="#A97BFF" rx="5" />
+<rect x="761.6" y="62" width="44.3" height="18" fill="#f1e05a" rx="5" />
+<rect x="805.9" y="62" width="23.0" height="18" fill="#b07219" rx="5" />
+<rect x="828.8" y="62" width="17.2" height="18" fill="#563d7c" rx="5" />
+<rect x="846.1" y="62" width="4.1" height="18" fill="#bdcb4d" rx="5" />
+<rect x="850.2" y="62" width="3.3" height="18" fill="#4F5D95" rx="5" />
+<rect x="853.4" y="62" width="3.0" height="18" fill="#A97BFF" rx="5" />
   
         <circle cx="52" cy="111" r="6" fill="#3572A5" />
         <text x="70" y="116" class="label">Python</text>
@@ -26,7 +26,7 @@
 
         <circle cx="52" cy="171" r="6" fill="#f1e05a" />
         <text x="70" y="176" class="label">JavaScript</text>
-        <text x="810" y="176" text-anchor="end" class="value">5.2%</text>
+        <text x="810" y="176" text-anchor="end" class="value">5.4%</text>
       
 
         <circle cx="52" cy="201" r="6" fill="#b07219" />
