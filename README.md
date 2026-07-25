@@ -54,6 +54,30 @@
 
 ## Latest Projects
 
+### ✨ [WolfamIT26/github-profile-generator](https://github.com/WolfamIT26/github-profile-generator)
+
+No description provided.
+
+<p>
+    <img src="https://img.shields.io/static/v1?label=Visibility&message=Public&color=238636&style=flat&logo=github&logoColor=white" alt="Visibility: Public" />
+    <img src="https://img.shields.io/static/v1?label=Stars&message=0&color=d29922&style=flat&logo=github&logoColor=white" alt="Stars: 0" />
+    <img src="https://img.shields.io/static/v1?label=Forks&message=0&color=8250df&style=flat&logo=git&logoColor=white" alt="Forks: 0" />
+    <img src="https://img.shields.io/static/v1?label=Commits&message=0&color=238636&style=flat&logo=git&logoColor=white" alt="Commits: 0" />
+    <img src="https://img.shields.io/static/v1?label=Open+Issues&message=0&color=da3633&style=flat&logo=github&logoColor=white" alt="Open Issues: 0" />
+    <img src="https://img.shields.io/static/v1?label=Default+Branch&message=main&color=0969da&style=flat&logo=git&logoColor=white" alt="Default Branch: main" />
+    <img src="https://img.shields.io/static/v1?label=Source&message=Personal&color=238636&style=flat&logo=github&logoColor=white" alt="Source: Personal" />
+    <img src="https://img.shields.io/static/v1?label=Permission&message=Admin&color=cf222e&style=flat&logo=github&logoColor=white" alt="Permission: Admin" />
+    <img src="https://img.shields.io/static/v1?label=Updated&message=Jul+22%2C+2026&color=30363d&style=flat&logo=github&logoColor=white" alt="Updated: Jul 22, 2026" />
+</p>
+
+<p>
+
+</p>
+
+<p>
+    <a href="https://github.com/WolfamIT26/github-profile-generator"><img src="https://img.shields.io/static/v1?label=GitHub&message=Repository&color=181717&style=flat&logo=github&logoColor=white" alt="GitHub: Repository" /></a>
+</p>
+
 ### ⚙️ [tutl0371/SEP](https://github.com/tutl0371/SEP)
 
 No description provided.
@@ -260,31 +284,6 @@ No description provided.
     <a href="https://github.com/Nhom-12-Laptrinhmang/E5-Web"><img src="https://img.shields.io/static/v1?label=GitHub&message=Repository&color=181717&style=flat&logo=github&logoColor=white" alt="GitHub: Repository" /></a>
 </p>
 
-### ✨ [Nhom-12-Laptrinhmang/ELEARNING](https://github.com/Nhom-12-Laptrinhmang/ELEARNING)
-
-No description provided.
-
-<p>
-    <img src="https://img.shields.io/static/v1?label=Visibility&message=Public&color=238636&style=flat&logo=github&logoColor=white" alt="Visibility: Public" />
-    <img src="https://img.shields.io/static/v1?label=Stars&message=0&color=d29922&style=flat&logo=github&logoColor=white" alt="Stars: 0" />
-    <img src="https://img.shields.io/static/v1?label=Forks&message=0&color=8250df&style=flat&logo=git&logoColor=white" alt="Forks: 0" />
-    <img src="https://img.shields.io/static/v1?label=Commits&message=2&color=238636&style=flat&logo=git&logoColor=white" alt="Commits: 2" />
-    <img src="https://img.shields.io/static/v1?label=Contributors&message=1&color=2ea44f&style=flat&logo=github&logoColor=white" alt="Contributors: 1" />
-    <img src="https://img.shields.io/static/v1?label=Open+Issues&message=0&color=da3633&style=flat&logo=github&logoColor=white" alt="Open Issues: 0" />
-    <img src="https://img.shields.io/static/v1?label=Default+Branch&message=main&color=0969da&style=flat&logo=git&logoColor=white" alt="Default Branch: main" />
-    <img src="https://img.shields.io/static/v1?label=Source&message=Organization&color=0969da&style=flat&logo=github&logoColor=white" alt="Source: Organization" />
-    <img src="https://img.shields.io/static/v1?label=Permission&message=Push&color=0969da&style=flat&logo=github&logoColor=white" alt="Permission: Push" />
-    <img src="https://img.shields.io/static/v1?label=Updated&message=Nov+8%2C+2025&color=30363d&style=flat&logo=github&logoColor=white" alt="Updated: Nov 8, 2025" />
-</p>
-
-<p>
-    <img src="https://img.shields.io/static/v1?label=Tech&message=Markdown&color=000000&style=flat&logo=markdown&logoColor=white" alt="Tech: Markdown" />
-</p>
-
-<p>
-    <a href="https://github.com/Nhom-12-Laptrinhmang/ELEARNING"><img src="https://img.shields.io/static/v1?label=GitHub&message=Repository&color=181717&style=flat&logo=github&logoColor=white" alt="GitHub: Repository" /></a>
-</p>
-
 ## Language Analysis
 
 <div align="center">
@@ -292,7 +291,7 @@ No description provided.
   <p>
     <img src="https://img.shields.io/static/v1?label=Python&message=79.8%25&color=3572A5&style=flat&logo=python&logoColor=white" alt="Python: 79.8%" />
     <img src="https://img.shields.io/static/v1?label=HTML&message=8.2%25&color=e34c26&style=flat&logo=html5&logoColor=white" alt="HTML: 8.2%" />
-    <img src="https://img.shields.io/static/v1?label=JavaScript&message=5.4%25&color=f1e05a&style=flat&logo=javascript&logoColor=white" alt="JavaScript: 5.4%" />
+    <img src="https://img.shields.io/static/v1?label=JavaScript&message=5.2%25&color=f1e05a&style=flat&logo=javascript&logoColor=white" alt="JavaScript: 5.2%" />
     <img src="https://img.shields.io/static/v1?label=Java&message=2.8%25&color=b07219&style=flat&logo=openjdk&logoColor=white" alt="Java: 2.8%" />
     <img src="https://img.shields.io/static/v1?label=CSS&message=2.1%25&color=563d7c&style=flat&logo=css3&logoColor=white" alt="CSS: 2.1%" />
     <img src="https://img.shields.io/static/v1?label=C&message=0.5%25&color=bdcb4d&style=flat" alt="C: 0.5%" />

@@ -21,23 +21,36 @@ export function buildReadme({
   user,
   organizations,
   latestRepos,
+  topProjects = [],
+  organizationProjects = [],
   languageStats,
   detectedTech,
   repositoryTotals,
   projectSectionLimit
 }) {
   const replacements = {
-    PROFILE_HEADER: buildProfileHeader({ username, user, organizations, repositoryTotals }),
-    PORTFOLIO_OVERVIEW: buildPortfolioOverview(username),
+    HERO: buildHero({ username, user, organizations, repositoryTotals }),
+    ABOUT: buildAbout({ username, user }),
     TECH_STACK: buildTechStack(detectedTech),
-    LATEST_PROJECTS: buildProjectSection('Latest Projects', latestRepos, {
+    GITHUB_STATISTICS: buildGitHubStatistics(username),
+    CONTRIBUTION_GRAPH: buildContributionGraph(username),
+    LANGUAGE_DISTRIBUTION: buildLanguageDistribution(languageStats),
+    TOP_PROJECTS: buildTopProjects(topProjects, projectSectionLimit),
+    ORGANIZATION_PROJECTS: buildProjectSection('Organization Projects', organizationProjects, {
+      emptyText: 'No organization repositories with contribution or push access were found.',
+      limit: projectSectionLimit,
+      showOwner: true
+    }),
+    LATEST_UPDATED_PROJECTS: buildProjectSection('Latest Updated Projects', latestRepos, {
       emptyText: 'No accessible repositories were found.',
       limit: projectSectionLimit,
       showOwner: true
     }),
-    LANGUAGE_ANALYSIS: buildLanguageAnalysis(languageStats),
-    GITHUB_STATS: buildGitHubStats(username),
-    ORGANIZATIONS: buildOrganizations(organizations),
+    ACHIEVEMENTS: buildAchievements(repositoryTotals, detectedTech, organizations),
+    ACTIVITY_TIMELINE: buildActivityTimeline(),
+    CONTRIBUTION_SNAKE: buildContributionSnake(username),
+    RANDOM_QUOTE: buildRandomQuote(username),
+    CONTACT: buildContact({ username, user }),
     FOOTER: buildFooter(username)
   };
 
@@ -47,15 +60,13 @@ export function buildReadme({
   ).trim()}\n`;
 }
 
-function buildPortfolioOverview(username) {
-  return `## Portfolio Overview
-
-<div align="center">
-  <img src="./assets/portfolio-overview.svg" alt="${escapeHtml(username)} automated portfolio overview" />
-</div>`;
-}
-
-function buildProfileHeader({ username, user, organizations, repositoryTotals }) {
+/**
+ * Builds the first visible profile block, including a generated typing banner.
+ *
+ * @param {{ username: string, user: Record<string, any>, organizations: Array<Record<string, any>>, repositoryTotals: Record<string, number> }} input
+ * @returns {string}
+ */
+function buildHero({ username, user, organizations, repositoryTotals }) {
   const displayName = escapeHtml(user.name || username);
   const login = escapeHtml(user.login || username);
   const bio = escapeHtml(user.bio || `GitHub profile for @${username}`);
@@ -80,6 +91,11 @@ function buildProfileHeader({ username, user, organizations, repositoryTotals })
 ${profileLinks}
   </p>`
     : '';
+  const typingText = encodeURIComponent([
+    'GitHub Profile generated from live API data',
+    'Full-stack projects, automation, and engineering metrics',
+    'Private, organization, collaborator, and merged-PR work analyzed'
+  ].join(';'));
 
   return `<div align="center">
   <a href="https://github.com/${encodeURIComponent(username)}">
@@ -87,12 +103,32 @@ ${profileLinks}
   </a>
   <h1>${displayName}</h1>
   <p><strong>@${login}</strong></p>
+  <p>
+    <img src="https://readme-typing-svg.demolab.com?font=Inter&weight=700&size=22&duration=2600&pause=850&color=58A6FF&center=true&vCenter=true&width=760&lines=${typingText}" alt="${login} typing animation" />
+  </p>
   <p>${bio}</p>
   <p>
 ${badges}
   </p>
 ${profileLinksBlock}
 </div>`;
+}
+
+function buildAbout({ username, user }) {
+  const lines = compact([
+    user.bio ? escapeHtml(user.bio) : `This profile is generated automatically from live GitHub data for <strong>@${escapeHtml(username)}</strong>.`,
+    user.company ? `Building and contributing from <strong>${escapeHtml(user.company)}</strong>.` : '',
+    user.location ? `Based in <strong>${escapeHtml(user.location)}</strong>.` : '',
+    'Repository languages, topics, dependency manifests, permissions, activity, commits, pull requests, and organizations are analyzed on every run.'
+  ]);
+
+  return `## About
+
+<div align="center">
+  <img src="./assets/portfolio-overview.svg" alt="${escapeHtml(username)} automated portfolio overview" />
+</div>
+
+${lines.map((line) => `<p align="center">${line}</p>`).join('\n')}`;
 }
 
 function buildTechStack(detectedTech) {
@@ -102,7 +138,7 @@ function buildTechStack(detectedTech) {
     return `## Tech Stack
 
 <div align="center">
-  <p>No matching technologies were detected from public repository languages, topics, or dependency files.</p>
+  <p>No matching technologies were detected from accessible repository languages, topics, or dependency files.</p>
 </div>`;
   }
 
@@ -130,8 +166,80 @@ ${icons}
 </div>`;
 }
 
-function buildProjectSection(title, repositories, { emptyText, limit, showOwner = false }) {
-  const activeRepos = sortByPushedDesc(repositories.filter((repo) => !repo.archived)).slice(0, limit);
+function buildGitHubStatistics(username) {
+  const encoded = encodeURIComponent(username);
+
+  return `## GitHub Statistics
+
+<div align="center">
+  <img src="./assets/github-summary.svg" alt="${encoded} GitHub engineering summary" />
+  <br />
+  <picture>
+    <source srcset="https://github-readme-stats.vercel.app/api?username=${encoded}&show_icons=true&include_all_commits=true&hide_border=true&theme=github_dark" media="(prefers-color-scheme: dark)" />
+    <img height="170" src="https://github-readme-stats.vercel.app/api?username=${encoded}&show_icons=true&include_all_commits=true&hide_border=true&theme=default" alt="${encoded} GitHub stats" />
+  </picture>
+  <picture>
+    <source srcset="https://github-readme-stats.vercel.app/api/top-langs/?username=${encoded}&layout=compact&hide_border=true&theme=github_dark" media="(prefers-color-scheme: dark)" />
+    <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=${encoded}&layout=compact&hide_border=true&theme=default" alt="${encoded} top languages" />
+  </picture>
+  <br />
+  <picture>
+    <source srcset="https://streak-stats.demolab.com?user=${encoded}&theme=github-dark-blue&hide_border=true" media="(prefers-color-scheme: dark)" />
+    <img src="https://streak-stats.demolab.com?user=${encoded}&theme=default&hide_border=true" alt="${encoded} GitHub streak" />
+  </picture>
+</div>`;
+}
+
+function buildContributionGraph(username) {
+  const encoded = encodeURIComponent(username);
+
+  return `## Contribution Graph
+
+<div align="center">
+  <picture>
+    <source srcset="https://github-readme-activity-graph.vercel.app/graph?username=${encoded}&theme=github-dark&hide_border=true" media="(prefers-color-scheme: dark)" />
+    <img src="https://github-readme-activity-graph.vercel.app/graph?username=${encoded}&theme=minimal&hide_border=true" alt="${encoded} activity graph" />
+  </picture>
+  <br />
+  <img src="./assets/contribution-calendar.svg" alt="${encoded} contribution calendar" />
+</div>`;
+}
+
+function buildLanguageDistribution(languageStats) {
+  const languageBadges = languageStats.topLanguages
+    .map((language) =>
+      imageBadge(language.name, `${language.percent}%`, language.color.replace('#', ''), languageLogo(language.name))
+    )
+    .join('\n');
+
+  return `## Language Distribution
+
+<div align="center">
+  <img src="./assets/language-chart.svg" alt="Repository language distribution chart" />
+  <p>
+${languageBadges || imageBadge('Languages', 'waiting for data', '6e7681', 'github')}
+  </p>
+</div>`;
+}
+
+function buildTopProjects(repositories, limit) {
+  const cards = buildProjectSection('Top Projects', repositories, {
+    emptyText: 'Top projects appear after repository discovery finishes.',
+    limit,
+    showOwner: true,
+    preserveOrder: true
+  });
+
+  return `${cards}
+
+<div align="center">
+  <img src="./assets/top-projects.svg" alt="Weighted top projects overview" />
+</div>`;
+}
+
+function buildProjectSection(title, repositories, { emptyText, limit, showOwner = false, preserveOrder = false }) {
+  const sourceRepos = repositories.filter((repo) => !repo.archived);
+  const activeRepos = (preserveOrder ? sourceRepos : sortByPushedDesc(sourceRepos)).slice(0, limit);
 
   if (activeRepos.length === 0) {
     return `## ${title}
@@ -159,6 +267,11 @@ function buildProjectCard(repo, { showOwner = false } = {}) {
     repo.homepage ? linkBadge('Demo', 'Live', '0E9F6E', 'googlechrome', toUrl(repo.homepage)) : '',
     ...deploymentLinks.map((url, index) => linkBadge('Deploy', `Link ${index + 1}`, '0A66C2', 'rocket', toUrl(url)))
   ]).join('\n');
+  const techBlock = techBadges
+    ? `<p>
+${techBadges}
+</p>`
+    : '';
 
   return `### ${projectEmoji(repo)} [${escapeHtml(title)}](${repo.html_url})
 
@@ -168,10 +281,7 @@ ${description}
 ${metadataBadges}
 </p>
 
-<p>
-${techBadges}
-</p>
-
+${techBlock}
 <p>
 ${links}
 </p>`;
@@ -222,72 +332,77 @@ function buildTechBadges(repo) {
     .join('\n');
 }
 
-function buildLanguageAnalysis(languageStats) {
-  const languageBadges = languageStats.topLanguages
-    .map((language) =>
-      imageBadge(language.name, `${language.percent}%`, language.color.replace('#', ''), languageLogo(language.name))
-    )
-    .join('\n');
+function buildAchievements(repositoryTotals, detectedTech, organizations) {
+  const badges = compact([
+    imageBadge('Repositories', formatNumber(repositoryTotals.repositories), '238636', 'github'),
+    imageBadge('Private Repos', formatNumber(repositoryTotals.privateRepos), '6f42c1', 'github'),
+    imageBadge('Organization Repos', formatNumber(repositoryTotals.organizationRepos), '0969da', 'github'),
+    imageBadge('Total Commits', formatNumber(repositoryTotals.commits), '2ea44f', 'git'),
+    imageBadge('Merged PRs', formatNumber(repositoryTotals.mergedPullRequests), '8250df', 'github'),
+    imageBadge('Reviews', formatNumber(repositoryTotals.reviews), 'cf222e', 'github'),
+    imageBadge('Stars', formatNumber(repositoryTotals.stars), 'd29922', 'github'),
+    imageBadge('Forks', formatNumber(repositoryTotals.forks), '8250df', 'git'),
+    imageBadge('Est. LOC', formatNumber(repositoryTotals.estimatedLinesOfCode), '0A66C2', 'code'),
+    imageBadge('Detected Tech', formatNumber(detectedTech.length), '58a6ff', 'github'),
+    organizations.length ? imageBadge('Organizations', formatNumber(organizations.length), 'db6d28', 'github') : ''
+  ]).join('\n');
 
-  return `## Language Analysis
+  return `## Achievements
 
 <div align="center">
-  <img src="./assets/language-chart.svg" alt="Repository language usage chart" />
   <p>
-${languageBadges || imageBadge('Languages', 'no public data', '6e7681', 'github')}
+${badges}
   </p>
 </div>`;
 }
 
-function buildGitHubStats(username) {
-  const encoded = encodeURIComponent(username);
-
-  return `## GitHub Stats
+function buildActivityTimeline() {
+  return `## Activity Timeline
 
 <div align="center">
-  <picture>
-    <source srcset="https://github-readme-stats.vercel.app/api?username=${encoded}&show_icons=true&include_all_commits=true&hide_border=true&theme=github_dark" media="(prefers-color-scheme: dark)" />
-    <img height="170" src="https://github-readme-stats.vercel.app/api?username=${encoded}&show_icons=true&include_all_commits=true&hide_border=true&theme=default" alt="${encoded} GitHub stats" />
-  </picture>
-  <picture>
-    <source srcset="https://github-readme-stats.vercel.app/api/top-langs/?username=${encoded}&layout=compact&hide_border=true&theme=github_dark" media="(prefers-color-scheme: dark)" />
-    <img height="170" src="https://github-readme-stats.vercel.app/api/top-langs/?username=${encoded}&layout=compact&hide_border=true&theme=default" alt="${encoded} top languages" />
-  </picture>
-  <br />
-  <picture>
-    <source srcset="https://streak-stats.demolab.com?user=${encoded}&theme=github-dark-blue&hide_border=true" media="(prefers-color-scheme: dark)" />
-    <img src="https://streak-stats.demolab.com?user=${encoded}&theme=default&hide_border=true" alt="${encoded} GitHub streak" />
-  </picture>
-  <br />
-  <picture>
-    <source srcset="https://github-readme-activity-graph.vercel.app/graph?username=${encoded}&theme=github-dark&hide_border=true" media="(prefers-color-scheme: dark)" />
-    <img src="https://github-readme-activity-graph.vercel.app/graph?username=${encoded}&theme=minimal&hide_border=true" alt="${encoded} activity graph" />
-  </picture>
-  <br />
-  <img src="./assets/contribution-calendar.svg" alt="${encoded} contribution calendar" />
-  <br />
-  <img src="./assets/github-contribution-grid-snake.svg" alt="${encoded} contribution snake" />
+  <img src="./assets/activity-timeline.svg" alt="Latest repository activity timeline" />
 </div>`;
 }
 
-function buildOrganizations(organizations) {
-  if (organizations.length === 0) {
-    return `## Organizations
+function buildContributionSnake(username) {
+  return `## Contribution Snake
 
 <div align="center">
-  <p>No public organizations were found.</p>
+  <img src="./assets/github-contribution-grid-snake.svg" alt="${escapeHtml(username)} contribution snake" />
 </div>`;
-  }
+}
 
-  const orgIcons = organizations
-    .map((org) => `  <a href="${org.html_url}"><img src="${org.avatar_url}" alt="${escapeHtml(org.login)}" title="${escapeHtml(org.login)}" width="50" height="50" /></a>`)
-    .join('\n');
+function buildRandomQuote(username) {
+  const quotes = [
+    'Build systems that can explain themselves.',
+    'Great automation turns routine maintenance into a reliable signal.',
+    'Readable code is operational leverage.',
+    'Measure the work, improve the workflow, ship the result.',
+    'The strongest portfolio is current because it updates itself.'
+  ];
+  const index = [...username].reduce((sum, char) => sum + char.charCodeAt(0), 0) % quotes.length;
 
-  return `## Organizations
+  return `## Random Quote
+
+<div align="center">
+  <blockquote><strong>${escapeHtml(quotes[index])}</strong></blockquote>
+</div>`;
+}
+
+function buildContact({ username, user }) {
+  const website = toUrl(user.blog);
+  const twitterUrl = user.twitter_username ? `https://twitter.com/${user.twitter_username}` : '';
+  const links = compact([
+    linkBadge('GitHub', `@${username}`, '181717', 'github', `https://github.com/${encodeURIComponent(username)}`),
+    website ? linkBadge('Website', 'Portfolio', '0A66C2', 'googlechrome', website) : '',
+    twitterUrl ? linkBadge('Twitter', `@${user.twitter_username}`, '1DA1F2', 'x', twitterUrl) : ''
+  ]).join('\n');
+
+  return `## Contact
 
 <div align="center">
   <p>
-${orgIcons}
+${links}
   </p>
 </div>`;
 }
@@ -325,9 +440,13 @@ function languageLogo(language) {
     go: 'go',
     rust: 'rust',
     dart: 'dart',
+    swift: 'swift',
     vue: 'vuedotjs',
+    react: 'react',
+    node: 'nodedotjs',
     csharp: 'dotnet',
     'c#': 'dotnet',
+    'c++': 'cplusplus',
     shell: 'gnubash',
     dockerfile: 'docker',
     markdown: 'markdown'

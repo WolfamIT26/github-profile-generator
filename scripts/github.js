@@ -381,6 +381,49 @@ export class GitHubClient {
     return items;
   }
 
+  async searchIssueCount(query) {
+    if (!this.token) {
+      return 0;
+    }
+
+    const data = await this.safeRequest(
+      {
+        method: 'GET',
+        url: '/search/issues',
+        params: {
+          q: query,
+          per_page: 1
+        }
+      },
+      { total_count: 0 },
+      `issue count "${query}"`
+    );
+
+    return data.total_count || 0;
+  }
+
+  async getUserContributionStats(username) {
+    if (!this.token) {
+      return {
+        mergedPullRequests: 0,
+        issues: 0,
+        reviews: 0
+      };
+    }
+
+    const [mergedPullRequests, issues, reviews] = await Promise.all([
+      this.searchIssueCount(`is:pr is:merged author:${username}`),
+      this.searchIssueCount(`is:issue author:${username}`),
+      this.searchIssueCount(`is:pr reviewed-by:${username}`)
+    ]);
+
+    return {
+      mergedPullRequests,
+      issues,
+      reviews
+    };
+  }
+
   async getReadmeRepositoryPool(username) {
     const authenticatedUser = await this.getAuthenticatedUser();
     const authLogin = authenticatedUser?.login || username;

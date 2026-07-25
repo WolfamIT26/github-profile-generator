@@ -7,23 +7,29 @@ import {
   analyzeRepositories,
   assetPath,
   calculateLanguageStats,
+  generateActivityTimelineSvg,
   generateContributionCalendarSvg,
   generateContributionSnakeSvg,
+  generateGitHubSummarySvg,
   generateLanguageChartSvg,
   generatePortfolioOverviewSvg,
+  generateTopProjectsSvg,
+  mergeContributionStats,
+  rankTopProjects,
   summarizeRepositoryTotals
 } from './stats.js';
-import { ensureDir, log, sortByPushedDesc, writeFileIfChanged } from './utils.js';
+import { ensureDir, log, sortByDiscoveryDesc, writeFileIfChanged } from './utils.js';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const USERNAME = process.env.GITHUB_USERNAME || process.env.GH_USERNAME || 'WolfamIT26';
 const LATEST_PROJECT_LIMIT = Number(process.env.LATEST_PROJECT_LIMIT || process.env.PROJECT_SECTION_LIMIT || 8);
+const PROFILE_OUTPUT_DIR = path.resolve(ROOT_DIR, process.env.PROFILE_OUTPUT_DIR || 'dist/profile');
 
 async function main() {
   log.section(`Generating GitHub Profile README for ${USERNAME}`);
-  await ensureDir(path.join(ROOT_DIR, 'assets'));
+  await ensureDir(path.join(PROFILE_OUTPUT_DIR, 'assets'));
 
-  const github = new GitHubClient();
+  const github = new GitHubClient({ rootDir: ROOT_DIR });
 
   const [user, repositoryPool, pinnedRepos] = await Promise.all([
     loadWithFallback('profile', () => github.getUser(USERNAME), fallbackUser(USERNAME)),
@@ -33,6 +39,11 @@ async function main() {
 
   const { organizations, repositories: loadedRepos } = repositoryPool;
   log.info(`loaded ${loadedRepos.length} unique repositories from personal, private, organization, permission, and merged-PR sources`);
+  const contributionStats = await loadWithFallback(
+    'contribution statistics',
+    () => github.getUserContributionStats(repositoryPool.authLogin || USERNAME),
+    { mergedPullRequests: 0, issues: 0, reviews: 0 }
+  );
 
   const allRepos = mergeLatestInputs([
     ...loadedRepos,
@@ -43,14 +54,17 @@ async function main() {
   ]);
 
   const enrichedRepos = await github.enrichRepositories(allRepos);
-  const { repositories, detectedTech } = analyzeRepositories(enrichedRepos);
-  const repoByName = new Map(repositories.map((repo) => [repo.full_name.toLowerCase(), repo]));
-  const latestRepos = sortByPushedDesc(repositories)
-    .slice(0, LATEST_PROJECT_LIMIT)
-    .map((repo) => repoByName.get(repo.full_name.toLowerCase()) || repo);
+  const analysis = analyzeRepositories(enrichedRepos);
+  const repositories = sortByDiscoveryDesc(analysis.repositories);
+  const detectedTech = analysis.detectedTech;
+  const latestRepos = repositories.slice(0, LATEST_PROJECT_LIMIT);
+  const topProjects = rankTopProjects(repositories, LATEST_PROJECT_LIMIT);
+  const organizationProjects = repositories
+    .filter((repo) => repo.sourceTags?.includes('organization'))
+    .slice(0, LATEST_PROJECT_LIMIT);
 
   const languageStats = calculateLanguageStats(repositories);
-  const repositoryTotals = summarizeRepositoryTotals(repositories);
+  const repositoryTotals = mergeContributionStats(summarizeRepositoryTotals(repositories), contributionStats);
   const contributionCalendar = await github.getContributionCalendar(USERNAME);
   const template = await loadTemplate(ROOT_DIR);
 
@@ -61,10 +75,13 @@ async function main() {
       detectedTech,
       languageStats,
       repositoryTotals
-    }, assetPath(ROOT_DIR, 'portfolio-overview.svg')),
-    generateLanguageChartSvg(languageStats, assetPath(ROOT_DIR, 'language-chart.svg')),
-    generateContributionCalendarSvg(contributionCalendar, assetPath(ROOT_DIR, 'contribution-calendar.svg'), USERNAME),
-    generateContributionSnakeSvg(contributionCalendar, assetPath(ROOT_DIR, 'github-contribution-grid-snake.svg'), USERNAME)
+    }, assetPath(PROFILE_OUTPUT_DIR, 'portfolio-overview.svg')),
+    generateGitHubSummarySvg({ username: USERNAME, repositoryTotals }, assetPath(PROFILE_OUTPUT_DIR, 'github-summary.svg')),
+    generateTopProjectsSvg(topProjects, assetPath(PROFILE_OUTPUT_DIR, 'top-projects.svg')),
+    generateActivityTimelineSvg(repositories, assetPath(PROFILE_OUTPUT_DIR, 'activity-timeline.svg')),
+    generateLanguageChartSvg(languageStats, assetPath(PROFILE_OUTPUT_DIR, 'language-chart.svg')),
+    generateContributionCalendarSvg(contributionCalendar, assetPath(PROFILE_OUTPUT_DIR, 'contribution-calendar.svg'), USERNAME),
+    generateContributionSnakeSvg(contributionCalendar, assetPath(PROFILE_OUTPUT_DIR, 'github-contribution-grid-snake.svg'), USERNAME)
   ]);
 
   const readme = buildReadme({
@@ -73,14 +90,16 @@ async function main() {
     user,
     organizations,
     latestRepos,
+    topProjects,
+    organizationProjects,
     languageStats,
     detectedTech,
     repositoryTotals,
     projectSectionLimit: LATEST_PROJECT_LIMIT
   });
 
-  await writeFileIfChanged(path.join(ROOT_DIR, 'README.md'), readme);
-  log.section('README generation complete');
+  await writeFileIfChanged(path.join(PROFILE_OUTPUT_DIR, 'README.md'), readme);
+  log.section(`README generation complete: ${path.relative(ROOT_DIR, PROFILE_OUTPUT_DIR)}`);
 }
 
 function mergeLatestInputs(repositories) {

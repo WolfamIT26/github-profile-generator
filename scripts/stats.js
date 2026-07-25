@@ -1,5 +1,26 @@
 import path from 'node:path';
-import { ensureDir, escapeHtml, formatNumber, percentage, writeFileIfChanged } from './utils.js';
+import { ensureDir, escapeHtml, formatDate, formatNumber, percentage, writeFileIfChanged } from './utils.js';
+
+const LANGUAGE_BUCKETS = [
+  'HTML',
+  'CSS',
+  'JavaScript',
+  'TypeScript',
+  'Python',
+  'Java',
+  'PHP',
+  'Kotlin',
+  'C#',
+  'C++',
+  'Go',
+  'Rust',
+  'Swift',
+  'Dart',
+  'Vue',
+  'React',
+  'Node',
+  'Others'
+];
 
 export const TECH_STACK = [
   {
@@ -506,6 +527,11 @@ const LANGUAGE_COLORS = {
   Rust: '#dea584',
   Dart: '#00B4AB',
   Vue: '#41b883',
+  React: '#61DAFB',
+  Node: '#339933',
+  Others: '#8b949e',
+  'C++': '#f34b7d',
+  Swift: '#F05138',
   Shell: '#89e051',
   Dockerfile: '#384d54',
   Markdown: '#083fa1'
@@ -623,6 +649,14 @@ function containsText(haystack, values = []) {
   return values.some((value) => haystack.includes(value.toLowerCase()));
 }
 
+/**
+ * Aggregates GitHub language byte totals into the required profile buckets.
+ * React, Vue, and Node.js are framework/runtime signals inferred from repository
+ * manifests and topics because GitHub does not report them as languages.
+ *
+ * @param {Array<Record<string, any>>} repositories
+ * @returns {{ total: number, rawLanguages: Array<Record<string, any>>, languages: Array<Record<string, any>>, topLanguages: Array<Record<string, any>> }}
+ */
 export function calculateLanguageStats(repositories) {
   const totals = new Map();
 
@@ -640,7 +674,7 @@ export function calculateLanguageStats(repositories) {
   }
 
   const total = [...totals.values()].reduce((sum, value) => sum + value, 0);
-  const languages = [...totals.entries()]
+  const rawLanguages = [...totals.entries()]
     .map(([name, value]) => ({
       name,
       value,
@@ -648,28 +682,61 @@ export function calculateLanguageStats(repositories) {
       percent: percentage(value, total, 1)
     }))
     .sort((a, b) => b.value - a.value);
+  const languages = buildLanguageBuckets(repositories, rawLanguages);
+  const bucketTotal = languages.reduce((sum, language) => sum + language.value, 0);
+  const bucketLanguages = languages.map((language) => ({
+    ...language,
+    percent: percentage(language.value, bucketTotal, 1)
+  }));
 
   return {
-    total,
-    languages,
-    topLanguages: languages.slice(0, 8)
+    total: bucketTotal || total,
+    rawLanguages,
+    languages: bucketLanguages,
+    topLanguages: bucketLanguages.filter((language) => language.value > 0).slice(0, 12)
   };
 }
 
-export function rankRepositories(repositories, limit = 6) {
-  return [...repositories]
+/**
+ * Ranks repositories with the profile formula:
+ * 40% commit count, 25% recent activity, 20% stars, 10% size, 5% description.
+ *
+ * @param {Array<Record<string, any>>} repositories
+ * @param {number} limit
+ * @returns {Array<Record<string, any>>}
+ */
+export function rankTopProjects(repositories, limit = 8) {
+  const activeRepos = repositories.filter((repo) => !repo.archived);
+  const maxCommits = maxBy(activeRepos, (repo) => repo.commitCount || 0);
+  const maxStars = maxBy(activeRepos, (repo) => repo.stargazers_count || 0);
+  const maxSize = maxBy(activeRepos, (repo) => repo.size || 0);
+  const now = Date.now();
+
+  return activeRepos
+    .map((repo) => {
+      const daysSinceActivity = Math.max(0, (now - new Date(repo.pushed_at || repo.updated_at || 0).getTime()) / 86400000);
+      const recentActivityScore = 1 / (1 + daysSinceActivity / 30);
+      const descriptionScore = repo.description?.trim() ? 1 : 0;
+      const score =
+        normalize(repo.commitCount, maxCommits) * 0.4 +
+        recentActivityScore * 0.25 +
+        normalize(repo.stargazers_count, maxStars) * 0.2 +
+        normalize(repo.size, maxSize) * 0.1 +
+        descriptionScore * 0.05;
+
+      return {
+        ...repo,
+        featuredScore: Number(score.toFixed(4))
+      };
+    })
     .filter((repo) => !repo.archived)
     .sort((a, b) => {
-      const updatedA = new Date(a.pushed_at || a.updated_at || 0).getTime();
-      const updatedB = new Date(b.pushed_at || b.updated_at || 0).getTime();
-
-      // Required featured-project ranking: stars, forks, recency, commits, topics.
       return (
-        b.stargazers_count - a.stargazers_count ||
-        b.forks_count - a.forks_count ||
-        updatedB - updatedA ||
+        b.featuredScore - a.featuredScore ||
         b.commitCount - a.commitCount ||
-        (b.topics?.length || 0) - (a.topics?.length || 0) ||
+        new Date(b.updated_at || b.pushed_at || 0) - new Date(a.updated_at || a.pushed_at || 0) ||
+        new Date(b.pushed_at || b.updated_at || 0) - new Date(a.pushed_at || a.updated_at || 0) ||
+        b.stargazers_count - a.stargazers_count ||
         a.name.localeCompare(b.name)
       );
     })
@@ -682,12 +749,14 @@ export function summarizeRepositoryTotals(repositories) {
       repositories: summary.repositories + 1,
       publicRepos: summary.publicRepos + (repo.private ? 0 : 1),
       privateRepos: summary.privateRepos + (repo.private ? 1 : 0),
+      organizationRepos: summary.organizationRepos + Number(repo.owner?.type === 'Organization' || repo.sourceTags?.includes('organization')),
       stars: summary.stars + (repo.stargazers_count || 0),
       forks: summary.forks + (repo.forks_count || 0),
       watchers: summary.watchers + (repo.watchers_count || 0),
       openIssues: summary.openIssues + (repo.open_issues_count || 0),
       commits: summary.commits + (repo.commitCount || 0),
       pullRequests: summary.pullRequests + (repo.pullRequestCount || 0),
+      mergedPullRequests: summary.mergedPullRequests + (repo.hasMergedPullRequest ? 1 : 0),
       contributors: summary.contributors + (repo.contributorCount || 0),
       estimatedLinesOfCode: summary.estimatedLinesOfCode + (repo.estimatedLinesOfCode || 0)
     }),
@@ -695,12 +764,16 @@ export function summarizeRepositoryTotals(repositories) {
       repositories: 0,
       publicRepos: 0,
       privateRepos: 0,
+      organizationRepos: 0,
       stars: 0,
       forks: 0,
       watchers: 0,
       openIssues: 0,
       commits: 0,
       pullRequests: 0,
+      mergedPullRequests: 0,
+      issues: 0,
+      reviews: 0,
       contributors: 0,
       estimatedLinesOfCode: 0
     }
@@ -710,6 +783,189 @@ export function summarizeRepositoryTotals(repositories) {
     ...summary,
     contributors: Math.max(...repositories.map((repo) => repo.contributorCount || 0), summary.contributors)
   };
+}
+
+export function mergeContributionStats(repositoryTotals, contributionStats = {}) {
+  return {
+    ...repositoryTotals,
+    mergedPullRequests: Math.max(repositoryTotals.mergedPullRequests || 0, contributionStats.mergedPullRequests || 0),
+    issues: contributionStats.issues || repositoryTotals.openIssues || 0,
+    reviews: contributionStats.reviews || 0
+  };
+}
+
+export async function generateGitHubSummarySvg({ username, repositoryTotals }, outputFile) {
+  const metrics = [
+    ['Total Repos', repositoryTotals.repositories],
+    ['Public', repositoryTotals.publicRepos],
+    ['Private', repositoryTotals.privateRepos],
+    ['Org Repos', repositoryTotals.organizationRepos],
+    ['Commits', repositoryTotals.commits],
+    ['Merged PRs', repositoryTotals.mergedPullRequests],
+    ['Issues', repositoryTotals.issues],
+    ['Reviews', repositoryTotals.reviews],
+    ['Stars', repositoryTotals.stars],
+    ['Forks', repositoryTotals.forks],
+    ['Est. LOC', repositoryTotals.estimatedLinesOfCode],
+    ['Watchers', repositoryTotals.watchers]
+  ];
+  const width = 900;
+  const height = 330;
+  const cards = metrics.map(([label, value], index) => {
+    const col = index % 4;
+    const row = Math.floor(index / 4);
+    const x = 34 + col * 216;
+    const y = 84 + row * 70;
+    return `
+      <rect x="${x}" y="${y}" width="192" height="52" rx="12" fill="#161b22" stroke="#30363d" />
+      <text x="${x + 16}" y="${y + 22}" class="label">${escapeHtml(label)}</text>
+      <text x="${x + 16}" y="${y + 43}" class="value">${escapeHtml(formatNumber(value || 0))}</text>
+    `;
+  }).join('\n');
+
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">${escapeHtml(username)} GitHub summary</title>
+  <desc id="desc">Summary of repositories, contributions, reviews, issues, stars, forks, and estimated lines of code.</desc>
+  <rect width="${width}" height="${height}" rx="22" fill="#0d1117" />
+  <text x="34" y="42" class="title">GitHub Engineering Summary</text>
+  <text x="866" y="42" text-anchor="end" class="subtitle">auto-generated</text>
+  ${cards}
+  <style>
+    .title { fill: #f0f6fc; font: 800 24px Arial, sans-serif; }
+    .subtitle, .label { fill: #8b949e; font: 700 12px Arial, sans-serif; }
+    .value { fill: #f0f6fc; font: 800 20px Arial, sans-serif; }
+  </style>
+</svg>
+`;
+
+  await ensureDir(path.dirname(outputFile));
+  return writeFileIfChanged(outputFile, svg);
+}
+
+export async function generateTopProjectsSvg(repositories, outputFile) {
+  const projects = repositories.slice(0, 5);
+  const width = 900;
+  const height = Math.max(180, 82 + projects.length * 74);
+  const rows = projects.length > 0
+    ? projects.map((repo, index) => {
+      const y = 74 + index * 74;
+      const tech = visibleProjectTech(repo, 3).map((item) => item.label).join(' / ') || repo.language || 'Code';
+      return `
+        <rect x="34" y="${y}" width="832" height="54" rx="12" fill="#161b22" stroke="#30363d" />
+        <text x="54" y="${y + 23}" class="project">${escapeHtml(repo.full_name)}</text>
+        <text x="54" y="${y + 42}" class="meta">${escapeHtml(tech)} • ${formatNumber(repo.commitCount)} commits • ${formatNumber(repo.stargazers_count)} stars • score ${repo.featuredScore ?? 0}</text>
+      `;
+    }).join('\n')
+    : '<text x="450" y="110" text-anchor="middle" class="meta">Top projects appear after repository discovery</text>';
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Top projects</title>
+  <desc id="desc">Weighted top projects ranked by commits, recency, stars, repository size, and description quality.</desc>
+  <rect width="${width}" height="${height}" rx="22" fill="#0d1117" />
+  <text x="34" y="42" class="title">Top Projects</text>
+  <text x="866" y="42" text-anchor="end" class="subtitle">40% commits • 25% recency • 20% stars</text>
+  ${rows}
+  <style>
+    .title { fill: #f0f6fc; font: 800 24px Arial, sans-serif; }
+    .subtitle, .meta { fill: #8b949e; font: 600 13px Arial, sans-serif; }
+    .project { fill: #f0f6fc; font: 800 16px Arial, sans-serif; }
+  </style>
+</svg>
+`;
+
+  await ensureDir(path.dirname(outputFile));
+  return writeFileIfChanged(outputFile, svg);
+}
+
+export async function generateActivityTimelineSvg(repositories, outputFile) {
+  const latest = repositories
+    .filter((repo) => repo.pushed_at || repo.updated_at)
+    .sort((a, b) => new Date(b.updated_at || b.pushed_at) - new Date(a.updated_at || a.pushed_at))
+    .slice(0, 8);
+  const width = 900;
+  const height = Math.max(210, 76 + latest.length * 48);
+  const rows = latest.length > 0
+    ? latest.map((repo, index) => {
+      const y = 74 + index * 48;
+      return `
+        <circle cx="48" cy="${y + 5}" r="6" fill="#58a6ff" />
+        <line x1="48" y1="${y + 12}" x2="48" y2="${y + 42}" stroke="#30363d" stroke-width="2" />
+        <text x="68" y="${y + 2}" class="project">${escapeHtml(repo.full_name)}</text>
+        <text x="68" y="${y + 22}" class="meta">Updated ${escapeHtml(formatDate(repo.updated_at || repo.pushed_at))} • pushed ${escapeHtml(formatDate(repo.pushed_at || repo.updated_at))}</text>
+      `;
+    }).join('\n')
+    : '<text x="450" y="115" text-anchor="middle" class="meta">Activity appears after repository discovery</text>';
+  const svg = `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Activity timeline</title>
+  <desc id="desc">Latest repository activity sorted by update and push dates.</desc>
+  <rect width="${width}" height="${height}" rx="22" fill="#0d1117" />
+  <text x="34" y="42" class="title">Activity Timeline</text>
+  ${rows}
+  <style>
+    .title { fill: #f0f6fc; font: 800 24px Arial, sans-serif; }
+    .project { fill: #f0f6fc; font: 800 15px Arial, sans-serif; }
+    .meta { fill: #8b949e; font: 600 13px Arial, sans-serif; }
+  </style>
+</svg>
+`;
+
+  await ensureDir(path.dirname(outputFile));
+  return writeFileIfChanged(outputFile, svg);
+}
+
+function buildLanguageBuckets(repositories, rawLanguages) {
+  const values = new Map(LANGUAGE_BUCKETS.map((name) => [name, 0]));
+  const rawMap = new Map(rawLanguages.map((language) => [normalizeLanguageName(language.name), language.value]));
+
+  for (const [language, value] of rawMap.entries()) {
+    const bucket = LANGUAGE_BUCKETS.includes(language) ? language : 'Others';
+    values.set(bucket, (values.get(bucket) || 0) + value);
+  }
+
+  for (const repo of repositories) {
+    const total = Object.values(repo.languages || {}).reduce((sum, value) => sum + Number(value || 0), 0);
+    const signal = Math.max(1, Math.round(total * 0.03));
+    const techIds = new Set((repo.detectedTech || []).map((tech) => tech.id));
+
+    if (techIds.has('react')) values.set('React', values.get('React') + signal);
+    if (techIds.has('nodejs')) values.set('Node', values.get('Node') + signal);
+    if (techIds.has('vue')) values.set('Vue', values.get('Vue') + signal);
+  }
+
+  return LANGUAGE_BUCKETS.map((name) => ({
+    name,
+    value: values.get(name) || 0,
+    color: getLanguageColor(name),
+    percent: 0
+  }));
+}
+
+function normalizeLanguageName(language) {
+  const normalized = String(language);
+  const aliases = {
+    'C#': 'C#',
+    CSharp: 'C#',
+    'C++': 'C++',
+    Cpp: 'C++',
+    JavaScript: 'JavaScript',
+    TypeScript: 'TypeScript'
+  };
+
+  return aliases[normalized] || normalized;
+}
+
+function normalize(value, max) {
+  if (!max) {
+    return 0;
+  }
+
+  return Number(value || 0) / max;
+}
+
+function maxBy(items, getter) {
+  return Math.max(0, ...items.map((item) => Number(getter(item) || 0)));
 }
 
 export async function generatePortfolioOverviewSvg({ username, repositories, detectedTech, languageStats, repositoryTotals }, outputFile) {
@@ -772,7 +1028,7 @@ export async function generatePortfolioOverviewSvg({ username, repositories, det
 }
 
 export async function generateLanguageChartSvg(languageStats, outputFile) {
-  const topLanguages = languageStats.topLanguages;
+  const topLanguages = languageStats.languages || languageStats.topLanguages;
   const width = 900;
   const height = Math.max(210, 118 + topLanguages.length * 30);
   const chartWidth = 820;

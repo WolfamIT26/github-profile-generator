@@ -1,7 +1,7 @@
 {
   "name": "github-profile-readme-auto-generator",
   "version": "1.0.0",
-  "description": "Automated GitHub Profile README generator for WolfamIT26 using the GitHub REST API.",
+  "description": "Automated GitHub Profile README generator and profile-repository deployer using GitHub REST API and GraphQL.",
   "type": "module",
   "private": true,
   "engines": {
@@ -10,7 +10,8 @@
   "scripts": {
     "start": "npm run update-readme",
     "update-readme": "node scripts/update-readme.js",
-    "check": "node --check scripts/update-readme.js && node --check scripts/github.js && node --check scripts/markdown.js && node --check scripts/stats.js && node --check scripts/utils.js && node --check scripts/cache.js"
+    "deploy-profile": "node scripts/deploy-profile.js",
+    "check": "node --check scripts/update-readme.js && node --check scripts/deploy-profile.js && node --check scripts/github.js && node --check scripts/markdown.js && node --check scripts/stats.js && node --check scripts/utils.js && node --check scripts/cache.js"
   },
   "dependencies": {
     "axios": "^1.7.9",

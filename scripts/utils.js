@@ -211,6 +211,20 @@ export function sortByPushedDesc(repositories) {
   });
 }
 
+export function sortByDiscoveryDesc(repositories) {
+  return [...repositories].sort((a, b) => {
+    const updatedDelta = new Date(b.updated_at || 0) - new Date(a.updated_at || 0);
+    const pushedDelta = new Date(b.pushed_at || 0) - new Date(a.pushed_at || 0);
+    return (
+      updatedDelta ||
+      pushedDelta ||
+      (b.stargazers_count || 0) - (a.stargazers_count || 0) ||
+      (b.commitCount || 0) - (a.commitCount || 0) ||
+      a.full_name.localeCompare(b.full_name)
+    );
+  });
+}
+
 export function decodeBase64(content = '') {
   return Buffer.from(content.replace(/\n/g, ''), 'base64').toString('utf8');
 }
