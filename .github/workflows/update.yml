@@ -56,5 +56,53 @@ jobs:
       - name: Generate profile README and assets
         run: npm run update-readme
 
-      - name: Deploy to profile repository
-        run: npm run deploy-profile
+      - name: Deploy generated profile
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          PROFILE_REPO_URL: https://github.com/WolfamIT26/WolfamIT26.git
+          PROFILE_DIR: ${{ runner.temp }}/WolfamIT26-profile
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GH_TOKEN}" ]; then
+            echo "GH_TOKEN secret is required."
+            exit 1
+          fi
+
+          SOURCE_README="${GITHUB_WORKSPACE}/dist/profile/README.md"
+          SOURCE_ASSETS="${GITHUB_WORKSPACE}/dist/profile/assets"
+
+          if [ ! -f "${SOURCE_README}" ]; then
+            echo "Generated README not found: ${SOURCE_README}"
+            exit 1
+          fi
+
+          if [ ! -d "${SOURCE_ASSETS}" ]; then
+            echo "Generated assets folder not found: ${SOURCE_ASSETS}"
+            exit 1
+          fi
+
+          AUTH_HEADER="AUTHORIZATION: basic $(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+
+          rm -rf "${PROFILE_DIR}"
+          git -c "http.https://github.com/.extraheader=${AUTH_HEADER}" \
+            clone --depth 1 "${PROFILE_REPO_URL}" "${PROFILE_DIR}"
+
+          cp -f "${SOURCE_README}" "${PROFILE_DIR}/README.md"
+          rm -rf "${PROFILE_DIR}/assets"
+          mkdir -p "${PROFILE_DIR}/assets"
+          cp -a "${SOURCE_ASSETS}/." "${PROFILE_DIR}/assets/"
+
+          cd "${PROFILE_DIR}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if [ -z "$(git status --porcelain -- README.md assets)" ]; then
+            echo "No profile README or asset changes to deploy."
+            exit 0
+          fi
+
+          git add README.md assets
+          git commit -m "docs: update generated profile README"
+          git -c "http.https://github.com/.extraheader=${AUTH_HEADER}" push origin HEAD
