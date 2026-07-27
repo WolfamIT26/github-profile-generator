@@ -2,7 +2,7 @@ import 'dotenv/config';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GitHubClient } from './github.js';
-import { buildReadme, loadTemplate } from './markdown.js';
+import { buildReadme, loadTemplate, resolveGitHubStatsImageUrls } from './markdown.js';
 import {
   analyzeRepositories,
   assetPath,
@@ -66,7 +66,10 @@ async function main() {
   const languageStats = calculateLanguageStats(repositories);
   const repositoryTotals = mergeContributionStats(summarizeRepositoryTotals(repositories), contributionStats);
   const contributionCalendar = await github.getContributionCalendar(USERNAME);
-  const template = await loadTemplate(ROOT_DIR);
+  const [template, githubStatsImageUrls] = await Promise.all([
+    loadTemplate(ROOT_DIR),
+    resolveGitHubStatsImageUrls(USERNAME)
+  ]);
 
   await Promise.all([
     generatePortfolioOverviewSvg({
@@ -95,7 +98,8 @@ async function main() {
     languageStats,
     detectedTech,
     repositoryTotals,
-    projectSectionLimit: LATEST_PROJECT_LIMIT
+    projectSectionLimit: LATEST_PROJECT_LIMIT,
+    githubStatsImageUrls
   });
 
   await writeFileIfChanged(path.join(PROFILE_OUTPUT_DIR, 'README.md'), readme);
