@@ -303,8 +303,8 @@ No description provided.
 ## GitHub Stats
 
 <div align="center">
-  <img height="170" src="https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api?username=WolfamIT26&show_icons=true&theme=github_dark&hide_border=true&cache_seconds=1800" alt="WolfamIT26 GitHub Stats" />
-  <img height="170" src="https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api/top-langs?username=WolfamIT26&layout=compact&theme=github_dark&hide_border=true&cache_seconds=1800" alt="WolfamIT26 Top Languages" />
+  <img height="170" src="./assets/github-stats.svg" alt="WolfamIT26 GitHub Stats" />
+  <img height="170" src="./assets/top-languages.svg" alt="WolfamIT26 Top Languages" />
   <br />
   <picture>
     <source srcset="https://streak-stats.demolab.com?user=WolfamIT26&theme=github-dark-blue&hide_border=true" media="(prefers-color-scheme: dark)" />

@@ -2,7 +2,7 @@ import 'dotenv/config';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { GitHubClient } from './github.js';
-import { buildReadme, loadTemplate, resolveGitHubStatsImageUrls } from './markdown.js';
+import { buildReadme, loadTemplate } from './markdown.js';
 import {
   analyzeRepositories,
   assetPath,
@@ -66,10 +66,7 @@ async function main() {
   const languageStats = calculateLanguageStats(repositories);
   const repositoryTotals = mergeContributionStats(summarizeRepositoryTotals(repositories), contributionStats);
   const contributionCalendar = await github.getContributionCalendar(USERNAME);
-  const [template, githubStatsImageUrls] = await Promise.all([
-    loadTemplate(ROOT_DIR),
-    resolveGitHubStatsImageUrls(USERNAME)
-  ]);
+  const template = await loadTemplate(ROOT_DIR);
 
   await Promise.all([
     generatePortfolioOverviewSvg({
@@ -80,9 +77,11 @@ async function main() {
       repositoryTotals
     }, assetPath(PROFILE_OUTPUT_DIR, 'portfolio-overview.svg')),
     generateGitHubSummarySvg({ username: USERNAME, repositoryTotals }, assetPath(PROFILE_OUTPUT_DIR, 'github-summary.svg')),
+    generateGitHubSummarySvg({ username: USERNAME, repositoryTotals }, assetPath(PROFILE_OUTPUT_DIR, 'github-stats.svg')),
     generateTopProjectsSvg(topProjects, assetPath(PROFILE_OUTPUT_DIR, 'top-projects.svg')),
     generateActivityTimelineSvg(repositories, assetPath(PROFILE_OUTPUT_DIR, 'activity-timeline.svg')),
     generateLanguageChartSvg(languageStats, assetPath(PROFILE_OUTPUT_DIR, 'language-chart.svg')),
+    generateLanguageChartSvg(languageStats, assetPath(PROFILE_OUTPUT_DIR, 'top-languages.svg')),
     generateContributionCalendarSvg(contributionCalendar, assetPath(PROFILE_OUTPUT_DIR, 'contribution-calendar.svg'), USERNAME),
     generateContributionSnakeSvg(contributionCalendar, assetPath(PROFILE_OUTPUT_DIR, 'github-contribution-grid-snake.svg'), USERNAME)
   ]);
@@ -98,8 +97,7 @@ async function main() {
     languageStats,
     detectedTech,
     repositoryTotals,
-    projectSectionLimit: LATEST_PROJECT_LIMIT,
-    githubStatsImageUrls
+    projectSectionLimit: LATEST_PROJECT_LIMIT
   });
 
   await writeFileIfChanged(path.join(PROFILE_OUTPUT_DIR, 'README.md'), readme);

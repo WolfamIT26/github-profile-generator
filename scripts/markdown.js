@@ -1,11 +1,9 @@
 import path from 'node:path';
-import axios from 'axios';
 import {
   compact,
   escapeHtml,
   formatDate,
   formatNumber,
-  log,
   readTextFile,
   shieldUrl,
   sortByPushedDesc,
@@ -13,8 +11,10 @@ import {
 } from './utils.js';
 import { projectEmoji, TECH_STACK, visibleProjectTech } from './stats.js';
 
-const GITHUB_STATS_PRIMARY_BASE_URL = 'https://github-readme-stats.vercel.app/api';
-const GITHUB_STATS_MIRROR_BASE_URL = 'https://github-readme-stats-git-masterrstaa-rickstaa.vercel.app/api';
+const LOCAL_GITHUB_STATS_IMAGES = {
+  stats: './assets/github-stats.svg',
+  topLanguages: './assets/top-languages.svg'
+};
 
 export async function loadTemplate(rootDir) {
   return readTextFile(path.join(rootDir, 'README.template.md'));
@@ -32,13 +32,13 @@ export function buildReadme({
   detectedTech,
   repositoryTotals,
   projectSectionLimit,
-  githubStatsImageUrls = buildGitHubStatsImageUrls(username)
+  githubStatsImages = LOCAL_GITHUB_STATS_IMAGES
 }) {
   const replacements = {
     HERO: buildHero({ username, user, organizations, repositoryTotals }),
     ABOUT: buildAbout({ username, user }),
     TECH_STACK: buildTechStack(detectedTech),
-    GITHUB_STATISTICS: buildGitHubStatistics(username, githubStatsImageUrls),
+    GITHUB_STATISTICS: buildGitHubStatistics(username, githubStatsImages),
     CONTRIBUTION_GRAPH: buildContributionGraph(username),
     LANGUAGE_DISTRIBUTION: buildLanguageDistribution(languageStats),
     TOP_PROJECTS: buildTopProjects(topProjects, projectSectionLimit),
@@ -64,99 +64,6 @@ export function buildReadme({
     (content, [key, value]) => content.replaceAll(`{{${key}}}`, value),
     template
   ).trim()}\n`;
-}
-
-/**
- * Resolves GitHub statistics image URLs with the primary service first and the
- * maintained mirror as a fallback when the primary service is unavailable.
- *
- * @param {string} username
- * @returns {Promise<{ stats: string, topLanguages: string, service: string, verified: boolean }>}
- */
-export async function resolveGitHubStatsImageUrls(username) {
-  const primary = buildGitHubStatsImageUrls(username, GITHUB_STATS_PRIMARY_BASE_URL);
-
-  if (process.env.GITHUB_STATS_IMAGE_SERVICE === 'mirror') {
-    log.info('GitHub stats images forced to mirror service by GITHUB_STATS_IMAGE_SERVICE=mirror');
-    return {
-      ...buildGitHubStatsImageUrls(username, GITHUB_STATS_MIRROR_BASE_URL),
-      service: 'mirror',
-      verified: false
-    };
-  }
-
-  const primaryStatus = await verifyGitHubStatsImageUrls(primary);
-
-  if (primaryStatus.ok) {
-    log.info(`GitHub stats images verified through primary service (${primaryStatus.statuses.join(', ')})`);
-    return {
-      ...primary,
-      service: 'primary',
-      verified: true
-    };
-  }
-
-  log.warn(`primary GitHub stats service failed verification (${primaryStatus.statuses.join(', ') || 'network error'}); checking mirror`);
-  const mirror = buildGitHubStatsImageUrls(username, GITHUB_STATS_MIRROR_BASE_URL);
-  const mirrorStatus = await verifyGitHubStatsImageUrls(mirror);
-
-  if (mirrorStatus.ok) {
-    log.info(`GitHub stats images verified through mirror service (${mirrorStatus.statuses.join(', ')})`);
-    return {
-      ...mirror,
-      service: 'mirror',
-      verified: true
-    };
-  }
-
-  log.warn(`GitHub stats image verification failed for primary and mirror; keeping primary URLs for GitHub rendering retry`);
-  return {
-    ...primary,
-    service: 'primary',
-    verified: false
-  };
-}
-
-function buildGitHubStatsImageUrls(username, baseUrl = GITHUB_STATS_PRIMARY_BASE_URL) {
-  const encoded = encodeURIComponent(username);
-  const topLanguagesEndpoint = baseUrl === GITHUB_STATS_MIRROR_BASE_URL
-    ? `${baseUrl}/top-langs`
-    : `${baseUrl}/top-langs/`;
-
-  return {
-    stats: `${baseUrl}?username=${encoded}&show_icons=true&theme=github_dark&hide_border=true&cache_seconds=1800`,
-    topLanguages: `${topLanguagesEndpoint}?username=${encoded}&layout=compact&theme=github_dark&hide_border=true&cache_seconds=1800`
-  };
-}
-
-async function verifyGitHubStatsImageUrls(urls) {
-  const statuses = await Promise.all([
-    getHttpStatus(urls.stats),
-    getHttpStatus(urls.topLanguages)
-  ]);
-
-  return {
-    ok: statuses.every((status) => status === 200),
-    statuses
-  };
-}
-
-async function getHttpStatus(url) {
-  try {
-    const response = await axios.get(url, {
-      responseType: 'text',
-      timeout: 10000,
-      validateStatus: () => true,
-      headers: {
-        Accept: 'image/svg+xml,text/plain,*/*'
-      }
-    });
-
-    return response.status;
-  } catch (error) {
-    log.warn(`could not verify ${url}: ${error.message}`);
-    return 0;
-  }
 }
 
 /**
