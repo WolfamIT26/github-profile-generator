@@ -288,24 +288,11 @@ No description provided.
 
 <div align="center">
   <img src="./assets/language-chart.svg" alt="Repository language usage chart" />
-  <p>
-    <img src="https://img.shields.io/static/v1?label=Python&message=79.8%25&color=3572A5&style=flat&logo=python&logoColor=white" alt="Python: 79.8%" />
-    <img src="https://img.shields.io/static/v1?label=HTML&message=8.2%25&color=e34c26&style=flat&logo=html5&logoColor=white" alt="HTML: 8.2%" />
-    <img src="https://img.shields.io/static/v1?label=JavaScript&message=5.2%25&color=f1e05a&style=flat&logo=javascript&logoColor=white" alt="JavaScript: 5.2%" />
-    <img src="https://img.shields.io/static/v1?label=Java&message=2.8%25&color=b07219&style=flat&logo=openjdk&logoColor=white" alt="Java: 2.8%" />
-    <img src="https://img.shields.io/static/v1?label=CSS&message=2.1%25&color=563d7c&style=flat&logo=css3&logoColor=white" alt="CSS: 2.1%" />
-    <img src="https://img.shields.io/static/v1?label=C&message=0.5%25&color=bdcb4d&style=flat" alt="C: 0.5%" />
-    <img src="https://img.shields.io/static/v1?label=PHP&message=0.4%25&color=4F5D95&style=flat&logo=php&logoColor=white" alt="PHP: 0.4%" />
-    <img src="https://img.shields.io/static/v1?label=Kotlin&message=0.3%25&color=A97BFF&style=flat&logo=kotlin&logoColor=white" alt="Kotlin: 0.3%" />
-  </p>
 </div>
 
 ## GitHub Stats
 
 <div align="center">
-  <img height="170" src="./assets/github-stats.svg" alt="WolfamIT26 GitHub Stats" />
-  <img height="170" src="./assets/top-languages.svg" alt="WolfamIT26 Top Languages" />
-  <br />
   <picture>
     <source srcset="https://streak-stats.demolab.com?user=WolfamIT26&theme=github-dark-blue&hide_border=true" media="(prefers-color-scheme: dark)" />
     <img src="https://streak-stats.demolab.com?user=WolfamIT26&theme=default&hide_border=true" alt="WolfamIT26 GitHub streak" />

@@ -11,11 +11,6 @@ import {
 } from './utils.js';
 import { projectEmoji, TECH_STACK, visibleProjectTech } from './stats.js';
 
-const LOCAL_GITHUB_STATS_IMAGES = {
-  stats: './assets/github-stats.svg',
-  topLanguages: './assets/top-languages.svg'
-};
-
 export async function loadTemplate(rootDir) {
   return readTextFile(path.join(rootDir, 'README.template.md'));
 }
@@ -31,14 +26,13 @@ export function buildReadme({
   languageStats,
   detectedTech,
   repositoryTotals,
-  projectSectionLimit,
-  githubStatsImages = LOCAL_GITHUB_STATS_IMAGES
+  projectSectionLimit
 }) {
   const replacements = {
     HERO: buildHero({ username, user, organizations, repositoryTotals }),
     ABOUT: buildAbout({ username, user }),
     TECH_STACK: buildTechStack(detectedTech),
-    GITHUB_STATISTICS: buildGitHubStatistics(username, githubStatsImages),
+    GITHUB_STATISTICS: buildGitHubStatistics(username),
     CONTRIBUTION_GRAPH: buildContributionGraph(username),
     LANGUAGE_DISTRIBUTION: buildLanguageDistribution(languageStats),
     TOP_PROJECTS: buildTopProjects(topProjects, projectSectionLimit),
@@ -172,16 +166,13 @@ ${icons}
 </div>`;
 }
 
-function buildGitHubStatistics(username, imageUrls) {
+function buildGitHubStatistics(username) {
   const encoded = encodeURIComponent(username);
 
   return `## GitHub Statistics
 
 <div align="center">
   <img src="./assets/github-summary.svg" alt="${encoded} GitHub engineering summary" />
-  <br />
-  <img height="170" src="${imageUrls.stats}" alt="${encoded} GitHub Stats" />
-  <img height="170" src="${imageUrls.topLanguages}" alt="${encoded} Top Languages" />
   <br />
   <picture>
     <source srcset="https://streak-stats.demolab.com?user=${encoded}&theme=github-dark-blue&hide_border=true" media="(prefers-color-scheme: dark)" />
@@ -205,20 +196,11 @@ function buildContributionGraph(username) {
 </div>`;
 }
 
-function buildLanguageDistribution(languageStats) {
-  const languageBadges = languageStats.topLanguages
-    .map((language) =>
-      imageBadge(language.name, `${language.percent}%`, language.color.replace('#', ''), languageLogo(language.name))
-    )
-    .join('\n');
-
+function buildLanguageDistribution() {
   return `## Language Distribution
 
 <div align="center">
   <img src="./assets/language-chart.svg" alt="Repository language distribution chart" />
-  <p>
-${languageBadges || imageBadge('Languages', 'waiting for data', '6e7681', 'github')}
-  </p>
 </div>`;
 }
 
